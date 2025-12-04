@@ -1,0 +1,84 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  database:
+    image: postgres:15-alpine
+    container_name: krypto-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: kryptouser
+      POSTGRES_PASSWORD: kryptopass
+      POSTGRES_DB: kryptodb
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - krypto-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U kryptouser -d kryptodb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Backend API (Node.js + Express)
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: krypto-backend
+    restart: unless-stopped
+    environment:
+      NODE_ENV: development
+      PORT: 5000
+      DB_HOST: database
+      DB_PORT: 5432
+      DB_USER: kryptouser
+      DB_PASSWORD: kryptopass
+      DB_NAME: kryptodb
+      JWT_SECRET: your-super-secret-jwt-key-change-this-in-production
+      JWT_EXPIRE: 15m
+      COINGECKO_API_URL: https://api.coingecko.com/api/v3
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    depends_on:
+      database:
+        condition: service_healthy
+    networks:
+      - krypto-network
+    command: npm run dev
+
+  # Frontend (React + Tailwind CSS)
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: krypto-frontend
+    restart: unless-stopped
+    environment:
+      REACT_APP_API_URL: http://localhost:5000/api
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    depends_on:
+      - backend
+    networks:
+      - krypto-network
+    stdin_open: true
+    tty: true
+    command: npm start
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  krypto-network:
+    driver: bridge
