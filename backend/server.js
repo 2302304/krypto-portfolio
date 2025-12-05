@@ -17,6 +17,9 @@ app.use(morgan('dev')); // Logging
 app.use(express.json()); // Parse JSON bodies
 app.use(express.urlencoded({ extended: true })); // Parse URL-encoded bodies
 
+// Import routes
+const authRoutes = require('./routes/authRoutes');
+
 // Health check endpoint
 app.get('/health', (req, res) => {
   res.status(200).json({
@@ -27,21 +30,30 @@ app.get('/health', (req, res) => {
   });
 });
 
-// API routes (will be added in later phases)
+// API routes
 app.get('/api', (req, res) => {
   res.json({
     message: 'Welcome to Krypto Portfolio API',
     version: '1.0.0',
+    phase: 'Phase 2 - Authentication',
     endpoints: {
       health: '/health',
-      auth: '/api/auth',
-      transactions: '/api/transactions',
-      portfolio: '/api/portfolio',
-      prices: '/api/prices',
-      market: '/api/market'
+      auth: {
+        register: 'POST /api/auth/register',
+        login: 'POST /api/auth/login',
+        me: 'GET /api/auth/me (protected)',
+        logout: 'POST /api/auth/logout (protected)'
+      },
+      transactions: '/api/transactions (coming soon)',
+      portfolio: '/api/portfolio (coming soon)',
+      prices: '/api/prices (coming soon)',
+      market: '/api/market (coming soon)'
     }
   });
 });
+
+// Mount routes
+app.use('/api/auth', authRoutes);
 
 // 404 handler
 app.use((req, res) => {
@@ -68,6 +80,7 @@ app.listen(PORT, () => {
   console.log(`📊 Environment: ${process.env.NODE_ENV || 'development'}`);
   console.log(`🔗 API: http://localhost:${PORT}/api`);
   console.log(`💚 Health: http://localhost:${PORT}/health`);
+  console.log(`🔐 Auth endpoints available at /api/auth`);
 });
 
 module.exports = app;
