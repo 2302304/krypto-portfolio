@@ -19,6 +19,7 @@ app.use(express.urlencoded({ extended: true })); // Parse URL-encoded bodies
 
 // Import routes
 const authRoutes = require('./routes/authRoutes');
+const transactionRoutes = require('./routes/transactionRoutes');
 
 // Health check endpoint
 app.get('/health', (req, res) => {
@@ -35,7 +36,7 @@ app.get('/api', (req, res) => {
   res.json({
     message: 'Welcome to Krypto Portfolio API',
     version: '1.0.0',
-    phase: 'Phase 2 - Authentication',
+    phase: 'Phase 3 - Transaction Management',
     endpoints: {
       health: '/health',
       auth: {
@@ -44,16 +45,24 @@ app.get('/api', (req, res) => {
         me: 'GET /api/auth/me (protected)',
         logout: 'POST /api/auth/logout (protected)'
       },
-      transactions: '/api/transactions (coming soon)',
-      portfolio: '/api/portfolio (coming soon)',
-      prices: '/api/prices (coming soon)',
-      market: '/api/market (coming soon)'
+      transactions: {
+        getAll: 'GET /api/transactions (protected)',
+        getOne: 'GET /api/transactions/:id (protected)',
+        create: 'POST /api/transactions (protected)',
+        update: 'PUT /api/transactions/:id (protected)',
+        delete: 'DELETE /api/transactions/:id (protected)',
+        stats: 'GET /api/transactions/stats (protected)'
+      },
+      portfolio: '/api/portfolio (coming in Phase 5)',
+      prices: '/api/prices (coming in Phase 4)',
+      market: '/api/market (coming in Phase 7)'
     }
   });
 });
 
 // Mount routes
 app.use('/api/auth', authRoutes);
+app.use('/api/transactions', transactionRoutes);
 
 // 404 handler
 app.use((req, res) => {
@@ -80,7 +89,8 @@ app.listen(PORT, () => {
   console.log(`📊 Environment: ${process.env.NODE_ENV || 'development'}`);
   console.log(`🔗 API: http://localhost:${PORT}/api`);
   console.log(`💚 Health: http://localhost:${PORT}/health`);
-  console.log(`🔐 Auth endpoints available at /api/auth`);
+  console.log(`🔐 Auth endpoints: /api/auth`);
+  console.log(`💰 Transaction endpoints: /api/transactions`);
 });
 
 module.exports = app;

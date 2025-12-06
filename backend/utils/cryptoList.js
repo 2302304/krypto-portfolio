@@ -1,0 +1,36 @@
+// Popular cryptocurrencies list
+// This will be used for dropdown selection in frontend
+const CRYPTO_LIST = [
+  { symbol: 'BTC', name: 'Bitcoin' },
+  { symbol: 'ETH', name: 'Ethereum' },
+  { symbol: 'BNB', name: 'Binance Coin' },
+  { symbol: 'SOL', name: 'Solana' },
+  { symbol: 'XRP', name: 'Ripple' },
+  { symbol: 'ADA', name: 'Cardano' },
+  { symbol: 'DOGE', name: 'Dogecoin' },
+  { symbol: 'TRX', name: 'TRON' },
+  { symbol: 'DOT', name: 'Polkadot' },
+  { symbol: 'MATIC', name: 'Polygon' },
+  { symbol: 'LTC', name: 'Litecoin' },
+  { symbol: 'AVAX', name: 'Avalanche' },
+  { symbol: 'LINK', name: 'Chainlink' },
+  { symbol: 'ATOM', name: 'Cosmos' },
+  { symbol: 'UNI', name: 'Uniswap' },
+  { symbol: 'XLM', name: 'Stellar' },
+  { symbol: 'ALGO', name: 'Algorand' },
+  { symbol: 'VET', name: 'VeChain' },
+  { symbol: 'FIL', name: 'Filecoin' },
+  { symbol: 'NEAR', name: 'NEAR Protocol' },
+  { symbol: 'APT', name: 'Aptos' },
+  { symbol: 'ARB', name: 'Arbitrum' },
+  { symbol: 'OP', name: 'Optimism' },
+  { symbol: 'ICP', name: 'Internet Computer' },
+  { symbol: 'HBAR', name: 'Hedera' },
+  { symbol: 'INJ', name: 'Injective' },
+  { symbol: 'IMX', name: 'Immutable X' },
+  { symbol: 'GRT', name: 'The Graph' },
+  { symbol: 'AAVE', name: 'Aave' },
+  { symbol: 'MKR', name: 'Maker' }
+];
+
+module.exports = CRYPTO_LIST;

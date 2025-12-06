@@ -8,6 +8,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
+import Transactions from './pages/Transactions';
 
 // Temporary placeholder components
 function HomePage() {
@@ -77,19 +78,6 @@ function PortfolioPage() {
   );
 }
 
-function TransactionsPage() {
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <h1 className="text-3xl font-bold mb-4">Transaktiot</h1>
-        <div className="card">
-          <p className="text-gray-600">Transaktiot tulossa Vaiheessa 3...</p>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 function MarketPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
@@ -136,7 +124,7 @@ function App() {
               path="/transactions"
               element={
                 <ProtectedRoute>
-                  <TransactionsPage />
+                  <Transactions />
                 </ProtectedRoute>
               }
             />
