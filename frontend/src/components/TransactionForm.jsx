@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { CRYPTO_LIST } from '../utils/cryptoList';
 import { getTodayDate } from '../utils/formatters';
+import { getSinglePrice } from '../services/priceService';
+import LivePrice from './LivePrice';
 
 const TransactionForm = ({ transaction, onSubmit, onCancel, loading }) => {
   const [formData, setFormData] = useState({
@@ -14,6 +16,7 @@ const TransactionForm = ({ transaction, onSubmit, onCancel, loading }) => {
   });
 
   const [errors, setErrors] = useState([]);
+  const [loadingPrice, setLoadingPrice] = useState(false);
 
   // If editing, populate form
   useEffect(() => {
@@ -30,7 +33,7 @@ const TransactionForm = ({ transaction, onSubmit, onCancel, loading }) => {
     }
   }, [transaction]);
 
-  const handleCryptoChange = (e) => {
+  const handleCryptoChange = async (e) => {
     const symbol = e.target.value;
     const crypto = CRYPTO_LIST.find(c => c.symbol === symbol);
     
@@ -39,6 +42,26 @@ const TransactionForm = ({ transaction, onSubmit, onCancel, loading }) => {
       cryptoSymbol: symbol,
       cryptoName: crypto ? crypto.name : ''
     });
+
+    // Auto-fetch current price
+    if (symbol && !transaction) {
+      try {
+        setLoadingPrice(true);
+        const response = await getSinglePrice(symbol);
+        
+        // KORJAUS: Parsitaan ensin numeroksi, sitten formatoidaan
+        const priceEur = parseFloat(response.data.price.price_eur) || 0;
+        
+        setFormData(prev => ({
+          ...prev,
+          priceEur: priceEur.toFixed(2)
+        }));
+      } catch (err) {
+        console.error('Error fetching price:', err);
+      } finally {
+        setLoadingPrice(false);
+      }
+    }
   };
 
   const handleChange = (e) => {
@@ -130,6 +153,15 @@ const TransactionForm = ({ transaction, onSubmit, onCancel, loading }) => {
             </option>
           ))}
         </select>
+        
+        {/* Live price display */}
+        {formData.cryptoSymbol && (
+          <div className="mt-2 p-3 bg-blue-50 rounded-lg">
+            <p className="text-sm text-gray-700">
+              Nykyinen markkinahinta: <LivePrice symbol={formData.cryptoSymbol} />
+            </p>
+          </div>
+        )}
       </div>
 
       {/* Amount */}
@@ -167,7 +199,11 @@ const TransactionForm = ({ transaction, onSubmit, onCancel, loading }) => {
           className="input"
           placeholder="0.00"
           required
+          disabled={loadingPrice}
         />
+        {loadingPrice && (
+          <p className="text-xs text-gray-500 mt-1">Haetaan nykyistä hintaa...</p>
+        )}
       </div>
 
       {/* Total (calculated) */}
@@ -221,7 +257,7 @@ const TransactionForm = ({ transaction, onSubmit, onCancel, loading }) => {
       <div className="flex gap-4">
         <button
           type="submit"
-          disabled={loading}
+          disabled={loading || loadingPrice}
           className="flex-1 btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {loading ? 'Tallennetaan...' : (transaction ? 'Päivitä' : 'Tallenna')}

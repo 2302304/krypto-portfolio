@@ -20,6 +20,10 @@ app.use(express.urlencoded({ extended: true })); // Parse URL-encoded bodies
 // Import routes
 const authRoutes = require('./routes/authRoutes');
 const transactionRoutes = require('./routes/transactionRoutes');
+const priceRoutes = require('./routes/priceRoutes');
+
+// Import price scheduler
+const { startPriceScheduler } = require('./config/priceScheduler');
 
 // Health check endpoint
 app.get('/health', (req, res) => {
@@ -36,7 +40,7 @@ app.get('/api', (req, res) => {
   res.json({
     message: 'Welcome to Krypto Portfolio API',
     version: '1.0.0',
-    phase: 'Phase 3 - Transaction Management',
+    phase: 'Phase 4 - CoinGecko API Integration',
     endpoints: {
       health: '/health',
       auth: {
@@ -53,8 +57,12 @@ app.get('/api', (req, res) => {
         delete: 'DELETE /api/transactions/:id (protected)',
         stats: 'GET /api/transactions/stats (protected)'
       },
+      prices: {
+        getAll: 'GET /api/prices',
+        getOne: 'GET /api/prices/:symbol',
+        refresh: 'POST /api/prices/refresh (protected)'
+      },
       portfolio: '/api/portfolio (coming in Phase 5)',
-      prices: '/api/prices (coming in Phase 4)',
       market: '/api/market (coming in Phase 7)'
     }
   });
@@ -63,6 +71,7 @@ app.get('/api', (req, res) => {
 // Mount routes
 app.use('/api/auth', authRoutes);
 app.use('/api/transactions', transactionRoutes);
+app.use('/api/prices', priceRoutes);
 
 // 404 handler
 app.use((req, res) => {
@@ -91,6 +100,10 @@ app.listen(PORT, () => {
   console.log(`💚 Health: http://localhost:${PORT}/health`);
   console.log(`🔐 Auth endpoints: /api/auth`);
   console.log(`💰 Transaction endpoints: /api/transactions`);
+  console.log(`💹 Price endpoints: /api/prices`);
+  
+  // Start price update scheduler
+  startPriceScheduler();
 });
 
 module.exports = app;
