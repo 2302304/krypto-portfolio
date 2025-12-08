@@ -50,14 +50,14 @@ const LivePrice = ({ symbol, showChange = true }) => {
   const isPositive = change >= 0;
 
   return (
-    <div className="inline-flex items-center gap-2">
+    <span className="inline-flex items-center gap-2">
       <span className="font-medium">{formatEUR(priceEur)}</span>
       {showChange && (
         <span className={`text-xs font-medium ${isPositive ? 'text-green-600' : 'text-red-600'}`}>
           {isPositive ? '▲' : '▼'} {Math.abs(change).toFixed(2)}%
         </span>
       )}
-    </div>
+    </span>
   );
 };
 

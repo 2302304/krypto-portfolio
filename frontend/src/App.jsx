@@ -9,6 +9,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import Transactions from './pages/Transactions';
+import Portfolio from './pages/Portfolio';
 
 // Temporary placeholder components
 function HomePage() {
@@ -65,19 +66,6 @@ function HomePage() {
   );
 }
 
-function PortfolioPage() {
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <h1 className="text-3xl font-bold mb-4">Portfolio</h1>
-        <div className="card">
-          <p className="text-gray-600">Portfolio-näkymä tulossa Vaiheessa 5...</p>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 function MarketPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
@@ -116,7 +104,7 @@ function App() {
               path="/portfolio"
               element={
                 <ProtectedRoute>
-                  <PortfolioPage />
+                  <Portfolio />
                 </ProtectedRoute>
               }
             />
