@@ -2,6 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { formatEUR, formatCryptoAmount } from '../utils/formatters';
 import LivePrice from '../components/LivePrice';
+import PortfolioPieChart from '../components/PortfolioPieChart';
+import ProfitLossBarChart from '../components/ProfitLossBarChart';
+import AllocationBarChart from '../components/AllocationBarChart';
 
 const Portfolio = () => {
   const { api } = useAuth();
@@ -9,6 +12,7 @@ const Portfolio = () => {
   const [portfolio, setPortfolio] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [activeTab, setActiveTab] = useState('table'); // 'table', 'charts'
 
   useEffect(() => {
     loadPortfolio();
@@ -127,103 +131,167 @@ const Portfolio = () => {
           </div>
         )}
 
-        {/* Holdings Table */}
-        <div className="card">
-          <h2 className="text-2xl font-bold mb-6">Omistukset</h2>
+        {/* Tab Navigation */}
+        {hasHoldings && (
+          <div className="mb-6">
+            <div className="border-b border-gray-200">
+              <nav className="-mb-px flex space-x-8">
+                <button
+                  onClick={() => setActiveTab('table')}
+                  className={`${
+                    activeTab === 'table'
+                      ? 'border-primary-600 text-primary-600'
+                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors`}
+                >
+                  📋 Taulukko
+                </button>
+                <button
+                  onClick={() => setActiveTab('charts')}
+                  className={`${
+                    activeTab === 'charts'
+                      ? 'border-primary-600 text-primary-600'
+                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors`}
+                >
+                  📊 Kaaviot
+                </button>
+              </nav>
+            </div>
+          </div>
+        )}
 
-          {!hasHoldings ? (
-            <div className="text-center py-12">
-              <div className="text-6xl mb-4">📭</div>
-              <p className="text-gray-500 mb-4">Ei vielä omistuksia</p>
-              <p className="text-sm text-gray-400 mb-6">
-                Lisää ensimmäinen transaktio aloittaaksesi portfolion seurannan
-              </p>
-              <a href="/transactions" className="btn-primary inline-block">
-                ➕ Lisää transaktio
-              </a>
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-gray-50 border-b-2 border-gray-200">
-                  <tr>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                      Krypto
-                    </th>
-                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-700 uppercase tracking-wider">
-                      Määrä
-                    </th>
-                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-700 uppercase tracking-wider">
-                      Keskim. ostohinta
-                    </th>
-                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-700 uppercase tracking-wider">
-                      Nykyinen hinta
-                    </th>
-                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-700 uppercase tracking-wider">
-                      Sijoitettu
-                    </th>
-                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-700 uppercase tracking-wider">
-                      Arvo nyt
-                    </th>
-                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-700 uppercase tracking-wider">
-                      Voitto/Tappio
-                    </th>
-                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-700 uppercase tracking-wider">
-                      ROI %
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {portfolio.holdings.map((holding) => (
-                    <tr key={holding.crypto_symbol} className="hover:bg-gray-50 transition-colors">
-                      <td className="px-4 py-4 whitespace-nowrap">
-                        <div>
-                          <div className="font-semibold text-gray-900">
-                            {holding.crypto_symbol}
-                          </div>
-                          <div className="text-xs text-gray-500">
-                            {holding.crypto_name}
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-4 py-4 whitespace-nowrap text-right text-sm text-gray-900">
-                        {formatCryptoAmount(holding.amount)}
-                      </td>
-                      <td className="px-4 py-4 whitespace-nowrap text-right text-sm text-gray-900">
-                        {formatEUR(holding.average_buy_price)}
-                      </td>
-                      <td className="px-4 py-4 whitespace-nowrap text-right">
-                        <LivePrice symbol={holding.crypto_symbol} showChange={false} />
-                      </td>
-                      <td className="px-4 py-4 whitespace-nowrap text-right text-sm text-gray-900">
-                        {formatEUR(holding.invested)}
-                      </td>
-                      <td className="px-4 py-4 whitespace-nowrap text-right font-semibold text-gray-900">
-                        {formatEUR(holding.current_value)}
-                      </td>
-                      <td className="px-4 py-4 whitespace-nowrap text-right">
-                        <span className={`font-semibold ${
-                          holding.profit_loss >= 0 ? 'text-green-600' : 'text-red-600'
-                        }`}>
-                          {holding.profit_loss >= 0 ? '+' : ''}{formatEUR(holding.profit_loss)}
-                        </span>
-                      </td>
-                      <td className="px-4 py-4 whitespace-nowrap text-right">
-                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                          holding.profit_loss_percent >= 0
-                            ? 'bg-green-100 text-green-800'
-                            : 'bg-red-100 text-red-800'
-                        }`}>
-                          {holding.profit_loss_percent >= 0 ? '+' : ''}{holding.profit_loss_percent.toFixed(2)}%
-                        </span>
-                      </td>
+        {/* Content - Table View */}
+        {activeTab === 'table' && (
+          <div className="card">
+            <h2 className="text-2xl font-bold mb-6">Omistukset</h2>
+
+            {!hasHoldings ? (
+              <div className="text-center py-12">
+                <div className="text-6xl mb-4">📭</div>
+                <p className="text-gray-500 mb-4">Ei vielä omistuksia</p>
+                <p className="text-sm text-gray-400 mb-6">
+                  Lisää ensimmäinen transaktio aloittaaksesi portfolion seurannan
+                </p>
+                <a href="/transactions" className="btn-primary inline-block">
+                  ➕ Lisää transaktio
+                </a>
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead className="bg-gray-50 border-b-2 border-gray-200">
+                    <tr>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+                        Krypto
+                      </th>
+                      <th className="px-4 py-3 text-right text-xs font-medium text-gray-700 uppercase tracking-wider">
+                        Määrä
+                      </th>
+                      <th className="px-4 py-3 text-right text-xs font-medium text-gray-700 uppercase tracking-wider">
+                        Keskim. ostohinta
+                      </th>
+                      <th className="px-4 py-3 text-right text-xs font-medium text-gray-700 uppercase tracking-wider">
+                        Nykyinen hinta
+                      </th>
+                      <th className="px-4 py-3 text-right text-xs font-medium text-gray-700 uppercase tracking-wider">
+                        Sijoitettu
+                      </th>
+                      <th className="px-4 py-3 text-right text-xs font-medium text-gray-700 uppercase tracking-wider">
+                        Arvo nyt
+                      </th>
+                      <th className="px-4 py-3 text-right text-xs font-medium text-gray-700 uppercase tracking-wider">
+                        Voitto/Tappio
+                      </th>
+                      <th className="px-4 py-3 text-right text-xs font-medium text-gray-700 uppercase tracking-wider">
+                        ROI %
+                      </th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {portfolio.holdings.map((holding) => (
+                      <tr key={holding.crypto_symbol} className="hover:bg-gray-50 transition-colors">
+                        <td className="px-4 py-4 whitespace-nowrap">
+                          <div>
+                            <div className="font-semibold text-gray-900">
+                              {holding.crypto_symbol}
+                            </div>
+                            <div className="text-xs text-gray-500">
+                              {holding.crypto_name}
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-4 py-4 whitespace-nowrap text-right text-sm text-gray-900">
+                          {formatCryptoAmount(holding.amount)}
+                        </td>
+                        <td className="px-4 py-4 whitespace-nowrap text-right text-sm text-gray-900">
+                          {formatEUR(holding.average_buy_price)}
+                        </td>
+                        <td className="px-4 py-4 whitespace-nowrap text-right">
+                          <LivePrice symbol={holding.crypto_symbol} showChange={false} />
+                        </td>
+                        <td className="px-4 py-4 whitespace-nowrap text-right text-sm text-gray-900">
+                          {formatEUR(holding.invested)}
+                        </td>
+                        <td className="px-4 py-4 whitespace-nowrap text-right font-semibold text-gray-900">
+                          {formatEUR(holding.current_value)}
+                        </td>
+                        <td className="px-4 py-4 whitespace-nowrap text-right">
+                          <span className={`font-semibold ${
+                            holding.profit_loss >= 0 ? 'text-green-600' : 'text-red-600'
+                          }`}>
+                            {holding.profit_loss >= 0 ? '+' : ''}{formatEUR(holding.profit_loss)}
+                          </span>
+                        </td>
+                        <td className="px-4 py-4 whitespace-nowrap text-right">
+                          <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                            holding.profit_loss_percent >= 0
+                              ? 'bg-green-100 text-green-800'
+                              : 'bg-red-100 text-red-800'
+                          }`}>
+                            {holding.profit_loss_percent >= 0 ? '+' : ''}{holding.profit_loss_percent.toFixed(2)}%
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Content - Charts View */}
+        {activeTab === 'charts' && hasHoldings && (
+          <div className="space-y-6">
+            {/* Portfolio Allocation Pie Chart */}
+            <div className="card">
+              <h2 className="text-2xl font-bold mb-6">🥧 Portfolio-jakauma</h2>
+              <p className="text-sm text-gray-600 mb-4">
+                Näyttää portfoliosi jakautumisen eri kryptovaluuttojen kesken
+              </p>
+              <PortfolioPieChart holdings={portfolio.holdings} />
             </div>
-          )}
-        </div>
+
+            {/* Profit/Loss Bar Chart */}
+            <div className="card">
+              <h2 className="text-2xl font-bold mb-6">📊 Voitto/Tappio per krypto</h2>
+              <p className="text-sm text-gray-600 mb-4">
+                Vertaa eri kryptovaluuttojen kannattavuutta
+              </p>
+              <ProfitLossBarChart holdings={portfolio.holdings} />
+            </div>
+
+            {/* Allocation Bar Chart */}
+            <div className="card">
+              <h2 className="text-2xl font-bold mb-6">💹 Omistukset arvon mukaan</h2>
+              <p className="text-sm text-gray-600 mb-4">
+                Portfolio-arvo per kryptovaluutta
+              </p>
+              <AllocationBarChart holdings={portfolio.holdings} />
+            </div>
+          </div>
+        )}
 
         {/* Auto-refresh info */}
         {hasHoldings && (
