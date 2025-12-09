@@ -1,116 +1,150 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
+import PortfolioSummaryCard from '../components/PortfolioSummaryCard';
+import RecentTransactions from '../components/RecentTransactions';
+import TopPerformers from '../components/TopPerformers';
+import QuickActions from '../components/QuickActions';
+import MiniPieChart from '../components/MiniPieChart';
 
 const Dashboard = () => {
-  const { user } = useAuth();
+  const { user, api } = useAuth();
+  
+  const [portfolio, setPortfolio] = useState(null);
+  const [transactions, setTransactions] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadDashboardData();
+    
+    // Refresh every 2 minutes
+    const interval = setInterval(loadDashboardData, 120000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const loadDashboardData = async () => {
+    try {
+      setLoading(true);
+      
+      // Load portfolio and transactions in parallel
+      const [portfolioRes, transactionsRes] = await Promise.all([
+        api.get('/portfolio'),
+        api.get('/transactions')
+      ]);
+
+      setPortfolio(portfolioRes.data.data);
+      setTransactions(transactionsRes.data.data.transactions);
+    } catch (err) {
+      console.error('Error loading dashboard:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return 'Huomenta';
+    if (hour < 18) return 'Hyvää päivää';
+    return 'Hyvää iltaa';
+  };
+
+  const userName = user?.email?.split('@')[0] || 'Käyttäjä';
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        {/* Welcome Header */}
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-gray-900 mb-2">
-            Tervetuloa, {user?.email}! 👋
+            {getGreeting()}, {userName}! 👋
           </h1>
-          <p className="text-xl text-gray-600">
-            Tämä on sinun henkilökohtainen dashboard
+          <p className="text-gray-600">
+            Tervetuloa takaisin. Tässä on yhteenveto portfoliostasi.
           </p>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-6 mb-8">
-          <div className="card bg-gradient-to-br from-green-50 to-green-100 border-2 border-green-200">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-green-600 font-medium mb-1">Portfolio-arvo</p>
-                <p className="text-3xl font-bold text-green-700">0,00 €</p>
-                <p className="text-xs text-green-600 mt-1">Lisää transaktioita</p>
-              </div>
-              <div className="text-5xl">💰</div>
-            </div>
-          </div>
-
-          <div className="card bg-gradient-to-br from-blue-50 to-blue-100 border-2 border-blue-200">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-blue-600 font-medium mb-1">Voitto/Tappio</p>
-                <p className="text-3xl font-bold text-blue-700">0,00 €</p>
-                <p className="text-xs text-blue-600 mt-1">0.00%</p>
-              </div>
-              <div className="text-5xl">📈</div>
-            </div>
-          </div>
-
-          <div className="card bg-gradient-to-br from-purple-50 to-purple-100 border-2 border-purple-200">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-purple-600 font-medium mb-1">Transaktiot</p>
-                <p className="text-3xl font-bold text-purple-700">0</p>
-                <p className="text-xs text-purple-600 mt-1">Yhteensä</p>
-              </div>
-              <div className="text-5xl">📊</div>
-            </div>
-          </div>
+        {/* Portfolio Summary Cards */}
+        <div className="mb-8">
+          <PortfolioSummaryCard portfolio={portfolio} loading={loading} />
         </div>
 
-        <div className="grid md:grid-cols-2 gap-6">
-          <div className="card">
-            <h2 className="text-2xl font-bold mb-4">🚀 Pääset alkuun</h2>
-            <div className="space-y-4">
-              <div className="flex items-start p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-                <span className="text-2xl mr-4">1️⃣</span>
-                <div>
-                  <h3 className="font-semibold text-gray-900">Lisää ensimmäinen transaktio</h3>
-                  <p className="text-sm text-gray-600 mt-1">
-                    Kirjaa ensimmäinen kryptoostoksesi portfolioon
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-start p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-                <span className="text-2xl mr-4">2️⃣</span>
-                <div>
-                  <h3 className="font-semibold text-gray-900">Tutki markkinoita</h3>
-                  <p className="text-sm text-gray-600 mt-1">
-                    Näe reaaliaikaiset hinnat ja markkinakehitys
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-start p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-                <span className="text-2xl mr-4">3️⃣</span>
-                <div>
-                  <h3 className="font-semibold text-gray-900">Seuraa portfoliota</h3>
-                  <p className="text-sm text-gray-600 mt-1">
-                    Analysoi sijoitustesi kehitystä visuaalisesti
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="card">
-            <h2 className="text-2xl font-bold mb-4">📊 Viimeisimmät tapahtumat</h2>
-            <div className="text-center py-12">
-              <div className="text-6xl mb-4">📭</div>
-              <p className="text-gray-500 mb-4">Ei vielä transaktioita</p>
-              <button className="btn-primary">
-                Lisää transaktio
-              </button>
-            </div>
-          </div>
+        {/* Quick Actions */}
+        <div className="mb-8">
+          <QuickActions />
         </div>
 
-        <div className="mt-8 card bg-gradient-to-r from-primary-500 to-indigo-600 text-white">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="text-2xl font-bold mb-2">
-                🎓 AMK Opinnäytetyö - Vaihe 2 valmis!
-              </h3>
-              <p className="text-primary-100">
-                Autentikaatio ja käyttäjähallinta toimii. Seuraavaksi: Transaktioiden hallinta.
-              </p>
+        {/* Main Content Grid */}
+        {portfolio && portfolio.holdings && portfolio.holdings.length > 0 && (
+          <div className="grid lg:grid-cols-2 gap-8 mb-8">
+            {/* Left Column */}
+            <div className="space-y-8">
+              {/* Recent Transactions */}
+              <RecentTransactions transactions={transactions} loading={loading} />
+              
+              {/* Top Performers */}
+              <TopPerformers holdings={portfolio.holdings} loading={loading} />
             </div>
-            <div className="text-6xl">✅</div>
+
+            {/* Right Column */}
+            <div className="space-y-8">
+              {/* Mini Pie Chart */}
+              <MiniPieChart holdings={portfolio.holdings} />
+              
+              {/* Stats Card */}
+              <div className="card bg-gradient-to-br from-indigo-50 to-purple-50 border-2 border-indigo-200">
+                <h3 className="text-xl font-bold mb-4">📊 Tilastoja</h3>
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-700">Transaktioita yhteensä:</span>
+                    <span className="font-semibold text-gray-900">{transactions.length}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-700">Eri kryptovaluuttoja:</span>
+                    <span className="font-semibold text-gray-900">{portfolio.holdings.length}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-700">Paras suorittaja:</span>
+                    <span className="font-semibold text-green-600">
+                      {[...portfolio.holdings]
+                        .sort((a, b) => b.profit_loss_percent - a.profit_loss_percent)[0]
+                        ?.crypto_symbol || '-'}
+                      {' '}
+                      ({[...portfolio.holdings]
+                        .sort((a, b) => b.profit_loss_percent - a.profit_loss_percent)[0]
+                        ?.profit_loss_percent.toFixed(2) || 0}%)
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
+        )}
+
+        {/* Empty State - No Holdings */}
+        {portfolio && (!portfolio.holdings || portfolio.holdings.length === 0) && !loading && (
+          <div className="card text-center py-12">
+            <div className="text-6xl mb-6">🚀</div>
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">
+              Aloita portfoliosi rakentaminen
+            </h2>
+            <p className="text-gray-600 mb-8 max-w-md mx-auto">
+              Lisää ensimmäinen transaktio aloittaaksesi portfoliosi seurannan ja analysoimaan sijoituksiasi.
+            </p>
+            <div className="flex gap-4 justify-center">
+              <a href="/transactions" className="btn-primary text-lg px-8 py-3">
+                ➕ Lisää transaktio
+              </a>
+              <a href="/market" className="btn-secondary text-lg px-8 py-3">
+                📊 Selaa markkinoita
+              </a>
+            </div>
+          </div>
+        )}
+
+        {/* Auto-refresh info */}
+        <div className="mt-8 text-center">
+          <p className="text-sm text-gray-500">
+            🔄 Dashboard päivittyy automaattisesti 2 minuutin välein
+          </p>
         </div>
       </div>
     </div>
