@@ -10,6 +10,7 @@ import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import Transactions from './pages/Transactions';
 import Portfolio from './pages/Portfolio';
+import Market from './pages/Market';
 
 // Temporary placeholder components
 function HomePage() {
@@ -44,9 +45,9 @@ function HomePage() {
 
           <div className="card text-center">
             <div className="text-4xl mb-4">📈</div>
-            <h3 className="text-xl font-semibold mb-2">Visualisoinnit</h3>
+            <h3 className="text-xl font-semibold mb-2">Markkinat</h3>
             <p className="text-gray-600">
-              Selkeät kaaviot ja graafit auttavat päätöksenteossa
+              Selaa top 100 kryptovaluuttaa ja seuraa markkinoita
             </p>
           </div>
         </div>
@@ -66,19 +67,6 @@ function HomePage() {
   );
 }
 
-function MarketPage() {
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <h1 className="text-3xl font-bold mb-4">Markkinat</h1>
-        <div className="card">
-          <p className="text-gray-600">Markkinanäkymä tulossa Vaiheessa 7...</p>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 function App() {
   return (
     <Router>
@@ -90,6 +78,7 @@ function App() {
             <Route path="/" element={<HomePage />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
+            <Route path="/market" element={<Market />} />
 
             {/* Protected routes */}
             <Route
@@ -113,14 +102,6 @@ function App() {
               element={
                 <ProtectedRoute>
                   <Transactions />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/market"
-              element={
-                <ProtectedRoute>
-                  <MarketPage />
                 </ProtectedRoute>
               }
             />

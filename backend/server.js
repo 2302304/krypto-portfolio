@@ -22,6 +22,7 @@ const authRoutes = require('./routes/authRoutes');
 const transactionRoutes = require('./routes/transactionRoutes');
 const priceRoutes = require('./routes/priceRoutes');
 const portfolioRoutes = require('./routes/portfolioRoutes');
+const marketRoutes = require('./routes/marketRoutes');
 
 // Import price scheduler
 const { startPriceScheduler } = require('./config/priceScheduler');
@@ -41,7 +42,7 @@ app.get('/api', (req, res) => {
   res.json({
     message: 'Welcome to Krypto Portfolio API',
     version: '1.0.0',
-    phase: 'Phase 5 - Portfolio Calculation',
+    phase: 'Phase 7 - Market Overview',
     endpoints: {
       health: '/health',
       auth: {
@@ -69,7 +70,12 @@ app.get('/api', (req, res) => {
         topPerformers: 'GET /api/portfolio/top-performers (protected)',
         allocation: 'GET /api/portfolio/allocation (protected)'
       },
-      market: '/api/market (coming in Phase 7)'
+      market: {
+        top: 'GET /api/market/top',
+        search: 'GET /api/market/search?q=bitcoin',
+        trending: 'GET /api/market/trending',
+        global: 'GET /api/market/global'
+      }
     }
   });
 });
@@ -79,6 +85,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/transactions', transactionRoutes);
 app.use('/api/prices', priceRoutes);
 app.use('/api/portfolio', portfolioRoutes);
+app.use('/api/market', marketRoutes);
 
 // 404 handler
 app.use((req, res) => {
@@ -109,6 +116,7 @@ app.listen(PORT, () => {
   console.log(`💰 Transaction endpoints: /api/transactions`);
   console.log(`💹 Price endpoints: /api/prices`);
   console.log(`📊 Portfolio endpoints: /api/portfolio`);
+  console.log(`🌐 Market endpoints: /api/market`);
   
   // Start price update scheduler
   startPriceScheduler();
